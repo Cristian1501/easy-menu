@@ -1,0 +1,9 @@
+<a href="{% url 'menu:home' %}">Hola, visita mi blog aqui</a>
+<br>
+{%for post in posts %}
+<a href="{% url 'menu:detail' post.id%}">{{post.title}}</a>
+<a href="{% url 'menu:update' post.id%}">Update</a>
+<a href="{% url 'menu:delete' post.id%}">Delete</a>
+{% endfor %}
+<br>
+<a href="{% url 'menu:create' %}">Crear un Post</a>

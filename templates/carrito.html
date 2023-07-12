@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Carrito de compras</title>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script>
+            $(document).ready(function() {
+                $('.btn-agregar-carrito').click(function(e) {
+                    e.preventDefault();
+                    var producto_id = $(this).data('producto-id');
+                    var cantidad = $(this).parent().find('#cantidad').val();
+                    var notas = $(this).parent().find('#notas-' + producto_id).val();  // Obtener el valor de las notas
+    
+                    agregarAlCarrito(producto_id, cantidad, notas);
+                });
+    
+                function agregarAlCarrito(producto_id, cantidad, notas) {
+                    $.ajax({
+                        url: '{% url 'menu:agregar_al_carrito' %}',
+                        method: 'POST',
+                        data: {
+                            'producto_id': producto_id,
+                            'cantidad': cantidad,
+                            'notas': notas,  // Enviar las notas en la solicitud
+                            'csrfmiddlewaretoken': '{{ csrf_token }}'
+                        },
+                        success: function() {
+                            alert('Producto agregado al carrito');
+                            actualizarNotas(producto_id, notas);  // Llamar a la función para actualizar las notas
+                        },
+                        error: function() {
+                            alert('Error al agregar el producto al carrito');
+                        }
+                    });
+                }
+    
+                // Función para actualizar las notas en el campo correspondiente
+                function actualizarNotas(producto_id, notas) {
+                    $('#notas-' + producto_id).val(notas);
+                }
+            });
+        </script>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+            }
+            
+            .agregar-btn, .eliminar-btn, .enviar-btn, .volver-btn {
+                display: inline-block;
+                padding: 10px 20px;
+                background-color: #337ab7;
+                color: #fff;
+                text-decoration: none;
+                border-radius: 5px;
+                margin-top: 10px;
+            }
+    
+            #btn-mostrar-productos:hover, .btn-agregar-carrito:hover, .ver-carrito-btn:hover {
+                background-color: #23527c;
+            }
+            .nota-input {
+                
+                padding: 10px;
+                border: 1px solid #ccc;
+                border-radius: 5px;
+                box-sizing: border-box;
+            }
+        </style>
+    </head>
+<body>
+    <h1>Carrito</h1>
+    <ul id="carrito-list">
+        {% for item in carrito_productos %}
+            <li>
+                {{ item.producto.numeroProducto }} - {{ item.producto.categoria }} - {{ item.producto.nombre }} - {{ item.producto.precio }} - {{ item.producto.descripcion }}
+                Cantidad: {{ item.cantidad }}
+                Precio Total: {{ item.precio_total }}
+                Notas: <span id="notas-{{ item.producto.numeroProducto }}">{{ item.notas }}</span>
+                <form method="POST" action="{% url 'menu:ver_carrito' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="producto_id" value="{{ item.producto.numeroProducto }}">
+                    <label for="notas-{{ item.producto.numeroProducto }}">Notas:</label>
+                    <textarea name="notas" id="notas-{{ item.producto.numeroProducto }}" class="nota-input" rows="4" cols="50">{{ item.notas }}</textarea>
+                    <button type="submit" class="agregar-btn">Agregar nota</button>
+                </form>
+                <form method="POST" action="{% url 'menu:eliminar_del_carrito' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="producto_id" value="{{ item.producto.numeroProducto }}">
+                    <button type="submit" class="eliminar-btn">Eliminar Producto</button>
+                </form>
+            </li>
+        {% endfor %}
+    </ul>
+    
+    <p>Total Precio: {{ total_precio }}</p>
+
+    <form method="POST" action="{% url 'menu:ver_carrito' %}">
+        {% csrf_token %}
+        <label for="numero_mesa">Mesa:</label>
+        <select name="numero_mesa" id="numero_mesa">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
+            <option value="9">9</option>
+        </select>
+        <button type="submit" class="enviar-btn">Enviar Orden</button>
+    </form>
+    <br><br>
+
+    <form action="{% url 'menu:mostrar_productos' %}">
+        <button type="submit" class="volver-btn">Volver a la Carta</button>
+    </form>
+    
+</body>
+</html>
+
+
+
+
+
+
+
+
+

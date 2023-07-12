@@ -1,0 +1,151 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Listado de productos</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var btnMostrarProductos = document.getElementById('btn-mostrar-productos');
+            var listaProductos = document.getElementById('productos-list');
+    
+            btnMostrarProductos.addEventListener('click', function() {
+                if (listaProductos.style.display === 'none') {
+                    listaProductos.style.display = 'block';
+                } else {
+                    listaProductos.style.display = 'none';
+                }
+            });
+        });
+    </script>
+    
+    <script>
+        $(document).ready(function() {
+            $('.btn-agregar-carrito').click(function(e) {
+                e.preventDefault();
+                var producto_id = $(this).data('producto-id');
+                var cantidad = $(this).parent().find('#cantidad').val();
+                var notas = $(this).parent().find('#notas-' + producto_id).val();  // Obtener el valor de las notas
+                agregarAlCarrito(producto_id, cantidad, notas);
+            });
+    
+            function agregarAlCarrito(producto_id, cantidad, notas) {
+                $.ajax({
+                    url: '{% url 'menu:agregar_al_carrito' %}',
+                    method: 'POST',
+                    data: {
+                        'producto_id': producto_id,
+                        'cantidad': cantidad,
+                        'notas': notas,  // Enviar las notas en la solicitud
+                        'csrfmiddlewaretoken': '{{ csrf_token }}'
+                    },
+                    success: function() {
+                        alert('Producto agregado al carrito');
+                    },
+                    error: function() {
+                        alert('Error al agregar el producto al carrito');
+                    }
+                });
+            }
+        });
+    </script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-top: 30px;
+        }
+
+        h2 {
+            text-align: center;
+            color: #666;
+        }
+
+        #btn-mostrar-productos, .btn-agregar-carrito, .ver-carrito-btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #337ab7;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+
+        #btn-mostrar-productos:hover, .btn-agregar-carrito:hover, .ver-carrito-btn:hover {
+            background-color: #23527c;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        li {
+            margin-bottom: 10px;
+        }
+
+        form {
+            display: inline-block;
+            margin-top: 10px;
+        }
+
+        label {
+            font-weight: bold;
+        }
+
+        select {
+            margin-right: 10px;
+        }
+
+       
+    </style>
+</head>
+<body>
+    <h1>Easy Menu</h1>
+    <h2>Carta Digital</h2>
+    
+    <button id="btn-mostrar-productos">Mostrar Carta</button>
+    <ul id="productos-list" style="display: none;">
+        <form method="GET" action="{% url 'menu:mostrar_productos' %}">
+            <label for="categoria">Filtrar por categoría:</label>
+            <select name="categoria" id="categoria">
+                <option value="">Todos</option>
+                <option value="entradas">entradas</option>
+                <option value="ensaladas">ensaladas</option>
+                <option value="carnes">carnes</option>
+                <option value="pescados">pescados</option>
+                <option value="pizzas">pizzas</option>
+                <option value="hamburguesas">hamburguesas</option>
+                
+            </select>
+            <button type="submit">Filtrar</button>
+        </form>
+        {% for producto in productos %}
+            {% if not categoria or producto.categoria == categoria %}
+                <li>
+                    {{ producto.numeroProducto }} - {{ producto.categoria}} - {{ producto.nombre }} - {{ producto.precio }} - {{ producto.descripcion }}
+                    <form method="POST" action="{% url 'menu:agregar_al_carrito' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="producto_id" value="{{ producto.numeroProducto }}">
+                        <label for="cantidad">Cantidad:</label>
+                        <input type="number" name="cantidad" id="cantidad" value="1" min="1">
+                        <button class="btn-agregar-carrito" data-producto-id="{{ producto.numeroProducto }}">Agregar al carrito</button>
+                    </form>
+                </li>
+            {% endif %}
+        {% endfor %}
+    </ul>
+    <form action="{% url 'menu:ver_carrito' %}">
+        <button type="submit" class="ver-carrito-btn">Ver carrito</button>
+    </form>
+</body>
+</html>
+
+
+
+
+
