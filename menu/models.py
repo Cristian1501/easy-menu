@@ -30,7 +30,7 @@ class Orden(models.Model):
     mesero = models.IntegerField()
     codigoEstado = models.IntegerField()
     productos = models.ManyToManyField(Producto, through='OrdenProducto', blank=True)
-    total = models.DecimalField(max_digits=10, decimal_places=2)
+    total = models.IntegerField()
 
     def __str__(self):
         return self.numeroOrden
